@@ -3,22 +3,22 @@ import pyaudio
 import numpy as np
 
 CHUNK = 1024
-"""Number of frames to buffer before writing."""
+"""Numero de marcos para almacenar antes de escribir."""
 FORMAT = pyaudio.paInt16
-"""The data type used to record audio. See ``pyaudio`` for constants."""
+"""El tipo de datos utilizado para grabar audio. Ver ``pyaudio`` para las constantes."""
 CHANNELS = 1
-"""The number of channels to record."""
+"""El número de canales para grabar."""
 RATE = 44100
-"""The sample rate."""
+"""La frecuencia de muestreo."""
 RECORD_SECONDS = 7
-"""Number of seconds to record."""
+"""Número de segundos para grabar."""
 
 
 
 def record_audio(filename=None):
-    """ Record 10 seconds of audio and optionally save it to a file
-    :param filename: The path to save the audio (optional).
-    :returns: The audio stream with parameters defined in this module.
+    """ Graba 10 segundos de audio y, opcionalmente, guárdelo en un archivo
+    :param filename: La ruta para guardar el audio (opcional).
+    :returns: El flujo de audio con los parámetros definidos en este módulo.
     """
     p = pyaudio.PyAudio()
 

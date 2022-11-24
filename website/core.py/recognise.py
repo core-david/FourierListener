@@ -12,21 +12,23 @@ KNOWN_EXTENSIONS = ["mp3", "wav", "flac", "m4a"]
 
 
 def get_song_info(filename):
-    """Gets the ID3 tags for a file. Returns None for tuple values that don't exist.
-    :param filename: Path to the file with tags to read
-    :returns: (artist, album, title)
-    :rtype: tuple(str/None, str/None, str/None)
+    """Obtiene las etiquetas ID3 para un archivo. Devuelve 'None' para los valores de tupla que no existen.
+    :param filename: ruta al archivo con etiquetas para leer
+    :returns: (artista, álbum, título)
+    :rtype: tuple(str/Ninguno, str/Ninguno, str/Ninguno)
     """
+
     tag = TinyTag.get(filename)
     artist = tag.artist if tag.albumartist is None else tag.albumartist
     return print((artist, tag.album, tag.title))
 
 
 def register_song(filename):
-    """Register a single song.
-    Checks if the song is already registered based on path provided and ignores
-    those that are already registered.
-    :param filename: Path to the file to register"""
+    """Registrar una sola canción.
+    Comprueba si la canción ya está registrada en función de la ruta proporcionada e ignora
+    los que ya están registrados.
+    :param filename: Ruta al archivo a registrar"""
+
     if song_in_db(filename):
         return
     hashes = fingerprint_file(filename)
@@ -44,16 +46,18 @@ def register_song(filename):
 
 
 def register_directory(path):
-    """Recursively register songs in a directory.
-    Uses :data:`~abracadabra.settings.NUM_WORKERS` workers in a pool to register songs in a
-    directory.
-    :param path: Path of directory to register
+    """Registra recursivamente canciones en un directorio.
+    Utiliza :data:`~abracadabra.settings.NUM_WORKERS` trabajadores en un grupo para registrar canciones en un
+    directorio.
+    :param path: Ruta del directorio a registrar
     """
+
     def pool_init(l):
-        """Init function that makes a lock available to each of the workers in
-        the pool. Allows synchronisation of db writes since SQLite only supports
-        one writer at a time.
+        """Función init que pone a disposición una llave a cada uno de los trabajadores en
+        el grupo. Permite la sincronización de escrituras de db ya que SQLite solo admite
+        un escritor a la vez.
         """
+
         global lock
         lock = l
         logging.info(f"Pool init in {current_process().name}")
@@ -73,14 +77,15 @@ def register_directory(path):
 
 
 def score_match(offsets):
-    """Score a matched song.
-    Calculates a histogram of the deltas between the time offsets of the hashes from the
-    recorded sample and the time offsets of the hashes matched in the database for a song.
-    The function then returns the size of the largest bin in this histogram as a score.
-    :param offsets: List of offset pairs for matching hashes
-    :returns: The highest peak in a histogram of time deltas
-    :rtype: int
+    """Encontrar una cancion que coincide.
+    Calcula un histograma de los deltas entre las distancias de tiempo de los hash de la
+    muestra grabada y las distancias de tiempo de los hashes coincidentes en la base de datos para una canción.
+    Luego, la función devuelve el tamaño del contenedor más grande en este histograma como una puntuación.
+    :param offsets: Lista de pares de distancias para hashes coincidentes
+    :returns: El pico más alto en un histograma de deltas de tiempo
+    :rtipo: int
     """
+
     # Use bins spaced 0.5 seconds apart
     binwidth = 0.5
     tks = list(map(lambda x: x[0] - x[1], offsets))
@@ -92,13 +97,14 @@ def score_match(offsets):
 
 
 def best_match(matches):
-    """For a dictionary of song_id: offsets, returns the best song_id.
-    Scores each song in the matches dictionary and then returns the song_id with the best score.
-    :param matches: Dictionary of song_id to list of offset pairs (db_offset, sample_offset)
-       as returned by :func:`~abracadabra.Storage.storage.get_matches`.
-    :returns: song_id with the best score.
+    """Para un diccionario de song_id: distancias, devuelve el mejor song_id.
+    Califica cada canción en el diccionario de coincidencias y luego devuelve el song_id con la mejor puntuación.
+    :param matches: diccionario de song_id a la lista de pares distancias ​​(db_offset, sample_offset)
+       como lo devuelve :func:`~abracadabra.Storage.storage.get_matches`.
+    :returns: song_id con la mejor puntuación.
     :rtype: str
     """
+
     matched_song = None
     best_score = 0
     for song_id, offsets in matches.items():
@@ -113,13 +119,14 @@ def best_match(matches):
 
 
 def recognise_song(filename):
-    """Recognises a pre-recorded sample.
-    Recognises the sample stored at the path ``filename``. The sample can be in any of the
-    formats in :data:`recognise.KNOWN_FORMATS`.
-    :param filename: Path of file to be recognised.
-    :returns: :func:`~abracadabra.recognise.get_song_info` result for matched song or None.
-    :rtype: tuple(str, str, str)
+    """Reconoce una muestra pregrabada.
+    Reconoce la muestra almacenada en la ruta ``filename``. La muestra puede estar en cualquiera de los
+    formatos en :data:`recognise.KNOWN_FORMATS`.
+    :param filename: Ruta del archivo a reconocer.
+    :returns: :func:`~abracadabra.recognise.get_song_info` resultado de la canción coincidente o Ninguno.
+    :rtipo: tupla(cadena, cadena, cadena)
     """
+
     hashes = fingerprint_file(filename)
     matches = get_matches(hashes)
     matched_song = best_match(matches)
@@ -132,14 +139,15 @@ def recognise_song(filename):
 
 
 def listen_to_song(filename=None):
-    """Recognises a song using the microphone.
-    Optionally saves the sample recorded using the path provided for use in future tests.
-    This function is good for one-off recognitions, to generate a full test suite, look
-    into :func:`~abracadabra.record.gen_many_tests`.
-    :param filename: The path to store the recorded sample (optional)
-    :returns: :func:`~abracadabra.recognise.get_song_info` result for matched song or None.
-    :rtype: tuple(str, str, str)
+    """Reconoce una canción usando el micrófono.
+    Opcionalmente, guarda la muestra registrada utilizando la ruta proporcionada para su uso en futuras pruebas.
+    Esta función es buena para reconocimientos únicos, para generar un conjunto de pruebas completo, mire
+    en :func:`~abracadabra.record.gen_many_tests`.
+    :param filename: La ruta para almacenar la muestra grabada (opcional)
+    :returns: :func:`~abracadabra.recognise.get_song_info` resultado de la canción coincidente o Ninguno.
+    :rtipo: tupla(cadena, cadena, cadena)
     """
+
     audio = record_audio(filename=filename)
     hashes = fingerprint_audio(audio)
     matches = get_matches(hashes)
