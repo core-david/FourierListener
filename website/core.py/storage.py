@@ -7,8 +7,8 @@ import settings
 
 @contextmanager
 def get_cursor():
-    """Get a connection/cursor to the database.
-    :returns: Tuple of connection and cursor.
+    """Obtener una conexión/cursor a la base de datos.
+    :returns: Tupla de conexión y cursor.
     """
     try:
         conn = sqlite3.connect(settings.DB_PATH, timeout=30)
@@ -18,8 +18,8 @@ def get_cursor():
 
 
 def setup_db():
-    """Create the database and tables.
-    To be run once through an interactive shell.
+    """Crear la base de datos y las tablas.
+    Para ser ejecutado una vez a través de un shell interactivo.
     """
     with get_cursor() as (conn, c):
         c.execute("CREATE TABLE IF NOT EXISTS hash (hash int, offset real, song_id text)")
@@ -39,10 +39,10 @@ def checkpoint_db():
 
 
 def song_in_db(filename):
-    """Check whether a path has already been registered.
-    :param filename: The path to check.
-    :returns: Whether the path exists in the database yet.
-    :rtype: bool
+    """Compruebe si ya se ha registrado una ruta.
+    :param filename: La ruta a verificar.
+    :returns: si la ruta ya existe en la base de datos.
+    :rtype: booleano
     """
     with get_cursor() as (conn, c):
         song_id = str(uuid.uuid5(uuid.NAMESPACE_OID, filename).int)
@@ -51,10 +51,10 @@ def song_in_db(filename):
 
 
 def store_song(hashes, song_info):
-    """Register a song in the database.
-    :param hashes: A list of tuples of the form (hash, time offset, song_id) as returned by
+    """Registrar una canción en la base de datos.
+    :param hashes: Una lista de tuplas de la forma (hash, time offset, song_id) devuelta por
         :func:`~abracadabra.fingerprint.fingerprint_file`.
-    :param song_info: A tuple of form (artist, album, title) describing the song.
+    :param song_info: Una tupla de forma (artista, álbum, título) que describe la canción.
     """
     if len(hashes) < 1:
         # TODO: After experiments have run, change this to raise error
@@ -69,13 +69,13 @@ def store_song(hashes, song_info):
 
 
 def get_matches(hashes, threshold=5):
-    """Get matching songs for a set of hashes.
-    :param hashes: A list of hashes as returned by
+    """Obtenga canciones coincidentes para un conjunto de hashes.
+    :param hashes: Una lista de hashes devueltos por
         :func:`~abracadabra.fingerprint.fingerprint_file`.
-    :param threshold: Return songs that have more than ``threshold`` matches.
-    :returns: A dictionary mapping ``song_id`` to a list of time offset tuples. The tuples are of
-        the form (result offset, original hash offset).
-    :rtype: dict(str: list(tuple(float, float)))
+    :param umbral: Devuelve canciones que tienen más de coincidencias de ``umbral``.
+    :returns: Un diccionario mapeando ``song_id`` a una lista de tuplas de compensación de tiempo. Las tuplas son de
+        el formulario (desplazamiento de resultado, desplazamiento hash original).
+    :rtype: dict(str: lista(tupla(flotante, flotante)))
     """
     h_dict = {}
     for h, t, _ in hashes:
@@ -91,7 +91,7 @@ def get_matches(hashes, threshold=5):
 
 
 def get_info_for_song_id(song_id):
-    """Lookup song information for a given ID."""
+    """Buscar información de la canción para un ID dado."""
     with get_cursor() as (conn, c):
         c.execute("SELECT artist, album, title FROM song_info WHERE song_id = ?", (song_id,))
         return c.fetchone()
